@@ -1,0 +1,121 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ===== FUNÇÕES ===== */
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function userTenant() {
+      return userDoc().data.tenantId;
+    }
+
+    function isADM() {
+      return userDoc().data.role == "ADM";
+    }
+
+    function isMotorista() {
+      return userDoc().data.role == "MOTORISTA";
+    }
+
+    function isSuperAdmin() {
+      return userDoc().data.isSuperAdmin == true
+        || userDoc().data.role == "SUPER_ADM";
+    }
+
+    /* ================= USERS ================= */
+    match /users/{userId} {
+      allow read: if isAuthenticated()
+        && (
+          request.auth.uid == userId
+          || resource.data.tenantId == userTenant()
+        );
+    }
+
+    /* ================= EMPRESAS ================= */
+    match /empresas/{empresaId} {
+      allow read: if isAuthenticated()
+        && resource.data.tenantId == userTenant();
+
+      allow update: if isAuthenticated()
+        && isADM()
+        && resource.data.tenantId == userTenant()
+        && request.resource.data.tenantId == resource.data.tenantId;
+
+      allow create, delete: if false;
+    }
+
+    /* ================= VEHICLES ================= */
+    match /vehicles/{id} {
+      allow read: if isAuthenticated()
+        && resource.data.tenantId == userTenant();
+
+      allow create, update, delete: if isAuthenticated()
+        && isADM()
+        && request.resource.data.tenantId == userTenant();
+    }
+
+    /* ================= DRIVERS ================= */
+    match /drivers/{id} {
+      allow read: if isAuthenticated()
+        && resource.data.tenantId == userTenant();
+
+      allow create, update, delete: if isAuthenticated()
+        && isADM()
+        && request.resource.data.tenantId == userTenant();
+    }
+
+    /* ================= TRIPS ================= */
+    match /trips/{id} {
+      allow read: if isAuthenticated()
+        && resource.data.tenantId == userTenant();
+
+      allow create: if isAuthenticated()
+        && (
+          isADM()
+          || isMotorista()
+        )
+        && request.resource.data.tenantId == userTenant();
+
+      allow update, delete: if isAuthenticated()
+        && (
+          isADM()
+          || (
+            isMotorista()
+            && resource.data.driverId == request.auth.uid
+          )
+        );
+    }
+
+    /* ================= ABASTECIMENTOS ================= */
+    match /abastecimentos/{id} {
+      allow read, create, update, delete: if isAuthenticated()
+        && (
+          request.resource.data.tenantId == userTenant()
+          || resource.data.tenantId == userTenant()
+        );
+    }
+
+    /* ================= ACCESS KEYS ================= */
+    match /access_keys/{id} {
+      allow read, update: if false;
+    }
+
+    /* ================= GPS LOGS ================= */
+    match /gps_logs/{id} {
+      allow create: if isAuthenticated()
+        && request.resource.data.tenantId == userTenant();
+
+      allow read: if isAuthenticated()
+        && resource.data.tenantId == userTenant();
+
+      allow update, delete: if false;
+    }
+  }
+}

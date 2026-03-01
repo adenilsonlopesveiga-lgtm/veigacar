@@ -1,0 +1,144 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #0f172a; /* azul escuro */
+  color: #ffffff;
+}
+
+input, button {
+  font-size: 16px;
+}
+
+button {
+  cursor: pointer;
+}
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #0f172a; /* azul escuro */
+  color: #ffffff;
+}
+
+input, button {
+  font-size: 16px;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* ===== RESET BÁSICO ===== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #0f172a; /* azul escuro do app */
+  color: #ffffff;
+}
+
+input,
+button {
+  font-size: 16px;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* ===================================================== */
+/* ===== UX MOBILE / RESPONSIVO – VEIGACAR ============== */
+/* ===================================================== */
+
+/* Controle de visibilidade por dispositivo */
+.desktop-only {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
+/* Container padrão das páginas */
+.page-container {
+  padding: 20px;
+}
+
+/* Título das páginas */
+.page-title {
+  font-size: 22px;
+  margin-bottom: 16px;
+}
+
+/* ================= CARD (MOBILE) ================= */
+
+/* Card com CONTRASTE REAL */
+.card {
+  background: #334155;        /* azul médio (bem mais claro que o fundo) */
+  color: #ffffff;             /* texto branco */
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Linhas internas do card */
+.card .row {
+  font-size: 15px;
+  margin-bottom: 8px;
+  color: #f1f5f9; /* quase branco */
+}
+
+/* Destaques (KM, minutos, totais) */
+.card .highlight {
+  color: #facc15; /* amarelo ouro */
+  font-weight: bold;
+}
+
+/* Botões dentro do card */
+.card button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+/* Botão Excluir */
+.card button {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .page-container {
+    padding: 12px;
+  }
+
+  .page-title {
+    text-align: center;
+    font-size: 18px;
+  }
+}

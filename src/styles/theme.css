@@ -1,0 +1,14 @@
+:root {
+  /* FUNDOS */
+  --bg-app: #020617;
+  --bg-card: #0f172a;
+
+  /* TEXTOS */
+  --text-main: #f8fafc;
+  --text-muted: #cbd5f5;
+
+  /* CORES PRINCIPAIS */
+  --primary: #2563eb;
+  --primary-light: #60a5fa;
+  --danger: #dc2626;
+}
