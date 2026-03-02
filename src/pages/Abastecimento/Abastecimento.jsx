@@ -156,7 +156,7 @@ export default function Abastecimento() {
 
     const q = query(
       collection(db, "vehicles"),
-      where("dados.tenantId", "==", tenantId),
+      where("tenantId", "==", tenantId),
       orderBy("createdAt", "asc")
     );
 

@@ -43,7 +43,7 @@ export function useGpsTracker({
     ativoRef.current = ativo;
 
     // 🛑 DESLIGA GPS
-    if (!ativo) {
+    if (!ativo || !viagemId) {
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
         watchIdRef.current = null;
