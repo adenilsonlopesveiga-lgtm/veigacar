@@ -68,6 +68,21 @@ function AjustarMapa({ posicoes }) {
   return null;
 }
 
+
+/* 👇 COLE AQUI */
+function ResizeFix() {
+  const map = useMap();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [map]);
+
+  return null;
+}
 /* ================= COMPONENTE ================= */
 
 export default function GpsAdm() {
@@ -189,8 +204,15 @@ const unsubGps = onSnapshot(qGps, (gpsSnap) => {
       <h2>GPS — ADM</h2>
 
       <div style={styles.map}>
-        <MapContainer center={centro} zoom={15} style={{ height: 450 }}>
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+       <MapContainer
+  center={centro}
+  zoom={15}
+  style={{ height: "100%", width: "100%" }}
+  scrollWheelZoom={true}
+>
+  
+
+  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
           {posicoes.map((p) => (
             <Marker
@@ -206,7 +228,8 @@ const unsubGps = onSnapshot(qGps, (gpsSnap) => {
             </Marker>
           ))}
 
-          <AjustarMapa posicoes={posicoes} />
+          <AjustarMapa posicoes={posicoes}
+       />
         </MapContainer>
       </div>
 
@@ -246,18 +269,22 @@ const unsubGps = onSnapshot(qGps, (gpsSnap) => {
 /* ================= ESTILOS ================= */
 
 const styles = {
-  container: {
-    minHeight: "100vh",
-    background: "#020617",
-    color: "#fff",
-    padding: 20,
-  },
-  map: {
-    border: "1px solid #334155",
-    borderRadius: 10,
-    overflow: "hidden",
-    marginBottom: 20,
-  },
+ container: {
+  minHeight: "100vh",
+  background: "#020617",
+  color: "#fff",
+  padding: 20,
+  display: "flex",
+  flexDirection: "column",
+},
+map: {
+  height: "70vh",   // 👈 altura baseada na tela
+  width: "100%",
+  border: "1px solid #334155",
+  borderRadius: 10,
+  overflow: "hidden",
+  marginBottom: 20,
+},
   cards: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))",
