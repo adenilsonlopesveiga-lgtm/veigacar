@@ -520,7 +520,7 @@ export default function Relatorios() {
     const doc = new jsPDF("p", "mm", "a4");
 
     const logo = new Image();
-    logo.src = "/logo-Gestão de Frotas.png";
+    logo.src = "/logo.png";
     doc.addImage(logo, "PNG", 10, 10, 30, 30);
 
     let y = 45;
