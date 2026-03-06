@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
 
 import {
   collection,
@@ -517,6 +518,7 @@ export default function Relatorios() {
      PDF
   ======================= */
   function gerarPdfRelatorio() {
+    
     const doc = new jsPDF("p", "mm", "a4");
 
     const logo = new Image();
@@ -749,6 +751,170 @@ export default function Relatorios() {
 
     doc.save(`relatorio_${empresaAtual?.nome}_${dataInicio}_${dataFim}.pdf`);
   }
+
+function gerarExcelRelatorio() {
+
+  const wb = XLSX.utils.book_new();
+
+  /* RESUMO GERAL */
+
+  const resumo = [
+    ["Indicador", "Valor"],
+    ["Total de Viagens", viagens.length],
+    ["KM Rodados", Number(totalKm || 0).toFixed(1)],
+    ["Horas Dirigindo", Number(totalHoras || 0).toFixed(2)],
+    ["Minutos Extras", totalExtras],
+    ["Total Abastecimentos", totalAbastecimentos],
+    ["Total Litros", Number(totalLitros || 0).toFixed(2)],
+    ["Total Gasto", Number(totalGasto || 0).toFixed(2)]
+  ];
+
+  const wsResumo = XLSX.utils.aoa_to_sheet(resumo);
+  XLSX.utils.book_append_sheet(wb, wsResumo, "Resumo");
+
+
+
+  /* KM POR VEICULO */
+
+  const kmVeiculos = [
+    ["Veículo", "KM Total"],
+    ...kmPorVeiculo.map(v => [
+      v.veiculo,
+      Number(v.km || 0).toFixed(1)
+    ])
+  ];
+
+  const wsKm = XLSX.utils.aoa_to_sheet(kmVeiculos);
+  XLSX.utils.book_append_sheet(wb, wsKm, "KM Veiculos");
+
+
+
+  /* VIAGENS */
+
+  const viagensSheet = [
+    [
+      "Data",
+      "Motorista",
+      "Veículo",
+      "Destino",
+      "KM Inicial",
+      "KM Final",
+      "Saída",
+      "Chegada",
+      "Observações"
+    ],
+    ...viagens.map(v => [
+      v.inicio?.toDate().toLocaleDateString() || "-",
+      v.driverName || "-",
+      v.vehicleName || "-",
+      v.destino || "-",
+      v.kmInicial ?? "-",
+      v.kmFinal ?? "-",
+      v.inicio?.toDate()?.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}) || "-",
+      v.fim?.toDate()?.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}) || "-",
+      v.observacoes || "-"
+    ])
+  ];
+
+  const wsViagens = XLSX.utils.aoa_to_sheet(viagensSheet);
+  XLSX.utils.book_append_sheet(wb, wsViagens, "Viagens");
+
+
+
+  /* ABASTECIMENTOS */
+
+  const abastecimentosSheet = [
+    ["Data","Motorista","Veículo","Combustível","Litros","Valor","Obs"],
+    ...abastecimentos.map(a => {
+
+      const d = a.dados || {};
+      const combustivel = d.tipoCombustivel || a.tipoCombustivel || "-";
+
+      const litros =
+        d.litros != null
+          ? Number(d.litros).toFixed(2)
+          : a.litros != null
+          ? Number(a.litros).toFixed(2)
+          : "-";
+
+      const valor =
+        d.valorTotal != null
+          ? Number(d.valorTotal).toFixed(2)
+          : a.valorTotal != null
+          ? Number(a.valorTotal).toFixed(2)
+          : 0;
+
+      const veicId = d.vehicleId || a.vehicleId || d.veiculoId || a.veiculoId;
+
+      return [
+        a.createdAt?.toDate ? a.createdAt.toDate().toLocaleDateString() : "-",
+        d.driverName || a.driverName || "-",
+        (veicId && mapaVeiculos[veicId]) || d.vehicleName || a.vehicleName || "-",
+        combustivel,
+        litros,
+        valor,
+        d.observacoes || a.observacoes || "-"
+      ];
+    })
+  ];
+
+  const wsAbastecimentos = XLSX.utils.aoa_to_sheet(abastecimentosSheet);
+  XLSX.utils.book_append_sheet(wb, wsAbastecimentos, "Abastecimentos");
+
+
+
+  /* COMBUSTIVEL */
+
+  const combustivelSheet = [
+    ["Combustível","Litros","Valor"],
+    ...Object.entries(resumoCombustivel).map(([tipo,d]) => [
+      tipo,
+      d.litros.toFixed(2),
+      d.valor.toFixed(2)
+    ])
+  ];
+
+  const wsComb = XLSX.utils.aoa_to_sheet(combustivelSheet);
+  XLSX.utils.book_append_sheet(wb, wsComb, "Combustivel");
+
+
+
+  /* VEICULOS */
+
+  const veiculoSheet = [
+    ["Veículo","Litros","Valor"],
+    ...Object.entries(resumoVeiculo).map(([veic,d]) => [
+      veic,
+      d.litros.toFixed(2),
+      d.valor.toFixed(2)
+    ])
+  ];
+
+  const wsVeic = XLSX.utils.aoa_to_sheet(veiculoSheet);
+  XLSX.utils.book_append_sheet(wb, wsVeic, "Gasto Veiculo");
+
+
+
+  /* FINANCEIRO */
+
+  const financeiro = [
+    ["Descrição","Valor"],
+    ["Valor do Serviço", Number(valorServico).toFixed(2)],
+    ["Horas Extras", Number(valorExtrasCalculado).toFixed(2)],
+    ["Viagens Extras", Number(valorViagensExtras).toFixed(2)],
+    ["Total Geral", Number(totalGeral).toFixed(2)]
+  ];
+
+  const wsFin = XLSX.utils.aoa_to_sheet(financeiro);
+  XLSX.utils.book_append_sheet(wb, wsFin, "Financeiro");
+
+
+
+  XLSX.writeFile(
+    wb,
+    `relatorio_${empresaAtual?.nome}_${dataInicio}_${dataFim}.xlsx`
+  );
+}
 
   /* =========================
      RENDER
@@ -1091,17 +1257,25 @@ export default function Relatorios() {
           </div>
         </div>
 
-        <button style={{ ...styles.button, width: "100%" }} onClick={gerarPdfRelatorio}>
-          Gerar PDF
-        </button>
-      </div>
+       <button style={{ ...styles.button, width: "100%" }} onClick={gerarPdfRelatorio}>
+  Gerar PDF
+</button>
 
-      <button
-        style={{ ...styles.button, width: "100%", marginTop: 16 }}
-        onClick={() => navigate("/home")}
-      >
-        Voltar
-      </button>
+<button
+  style={{ ...styles.button, width: "100%", marginTop: 10 }}
+  onClick={gerarExcelRelatorio}
+>
+  Gerar Excel
+</button>
+
+</div>
+
+<button
+  style={{ ...styles.button, width: "100%", marginTop: 16 }}
+  onClick={() => navigate("/home")}
+>
+  Voltar
+</button>
     </div>
   );
 }
