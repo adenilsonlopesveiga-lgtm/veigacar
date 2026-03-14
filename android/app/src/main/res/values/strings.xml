@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">VeigaCar</string>
+    <string name="title_activity_main">VeigaCar</string>
+    <string name="package_name">app.netlify.majestic_kulfi_2247e8.twa</string>
+    <string name="custom_url_scheme">app.netlify.majestic_kulfi_2247e8.twa</string>
+</resources>
